@@ -17,7 +17,7 @@ class isAuth
     public function handle(Request $request, Closure $next): Response
     {
         // Checamos si hay una cookie llamada 'token'
-       /*  $token = $request->cookie('token');
+       $token = $request->cookie('token');
 
         if ($token) {
             // Checa si ese token es válido para algun usuario
@@ -25,8 +25,8 @@ class isAuth
             if ($user) {
                 return $next($request);
             }
-        } */
+        }
 
-        return $next($request);
+        return response()->json(['error' => 'Unauthorized'], 401);
     }
 }
