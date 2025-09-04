@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-class isAuth
+class Auth
 {
     /**
      * Handle an incoming request.
@@ -17,7 +17,7 @@ class isAuth
     public function handle(Request $request, Closure $next): Response
     {
         // Checamos si hay una cookie llamada 'token'
-       $token = $request->cookie('token');
+        $token = $request->cookie('token');
 
         if ($token) {
             // Checa si ese token es válido para algun usuario
