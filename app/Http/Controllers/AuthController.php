@@ -65,4 +65,53 @@ class AuthController extends Controller
             return response()->json(['error' => 'Could not create token', 'exception' => $e->getMessage()], 500);
         }
     }
+
+    // Obtener informacion del usuario autenticado
+    public function getUser(Request $request)
+    {
+        // Obtener el token de la cookie
+        $token = $request->cookie('token');
+
+        if (!$token) {
+            return response()->json(['error' => 'Token not provided'], 401);
+        }
+
+        try {
+            // Verificate si el token es valido y obtiene el usuario
+            /* TODO: alternativas
+            JWTAuth::setToken($token)->checkOrFail();
+            JWTAuth::setToken($token)->authenticate();
+            $user = JWTAuth::parseToken()->authenticate(); //-- Usa el token del request (header o cookie)
+
+             */
+            $user = JWTAuth::setToken($token)->user();
+            // Si no se encuentra el usuario con ese token
+            if (!$user) {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+            // Si el token es valido, retorna la información del usuario
+            return response()->json(['user' => $user], 200);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Could not decode token', 'exception' => $e->getMessage()], 401);
+        }
+    }
+
+    // Logout de un usuario (elimina la cookie)
+    public function logout(Request $request)
+    {
+        // Obtener el token de la cookie
+        $token = $request->cookie('token');
+        if ($token) {
+            try {
+                // Invalida el token que le pasamos
+                JWTAuth::setToken($token)->invalidate();
+                // Retorna una respuesta exitosa y elimina la cookie
+                // TODO: revisar si es necesario el withoutCookie
+
+                return response()->json(['message' => 'Successfully logged out'], 200)->cookie('token', '', -1);
+            } catch (JWTException $e) {
+                return response()->json(['error' => 'Could not invalidate token', 'exception' => $e->getMessage()], 500);
+            }
+        }
+    }
 }
