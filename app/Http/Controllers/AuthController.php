@@ -60,7 +60,7 @@ class AuthController extends Controller
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
             // Si todo va bien, retorna el usuario y el token en forma de cookie
-            return response()->json(['user' => JWTAuth::user()], 200)->cookie('token', $token, 60 * 24); // Cookie por 1 día
+            return response()->json(['user' => JWTAuth::user()], 200)->cookie('token', $token, 60 * 24, '/'); // Cookie por 1 día
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token', 'exception' => $e->getMessage()], 500);
         }
@@ -73,6 +73,7 @@ class AuthController extends Controller
         $token = $request->cookie('token');
 
         if (!$token) {
+            return response()->json(['mensaje' => 'La respuesta llego al servidor'], 200);
             return response()->json(['error' => 'Token not provided'], 401);
         }
 
