@@ -29,6 +29,7 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    // Indica si las cookies, cabeceras de autorización u TLS client certificates están permitidas en solicitudes CORS
+    'supports_credentials' => true,
 
 ];
