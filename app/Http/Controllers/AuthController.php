@@ -60,7 +60,17 @@ class AuthController extends Controller
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
             // Si todo va bien, retorna el usuario y el token en forma de cookie
-            return response()->json(['user' => JWTAuth::user()], 200)->cookie('token', $token, 60 * 24, '/'); // Cookie por 1 día
+            return response()->json(['user' => JWTAuth::user()], 200)->cookie(
+                'token',
+                $token,
+                config('jwt.ttl'),
+                '/',
+                null,
+                true, // Secure
+                true, // HttpOnly
+                false,
+                'none'
+            ); // Cookie por 1 día
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token', 'exception' => $e->getMessage()], 500);
         }
@@ -73,7 +83,6 @@ class AuthController extends Controller
         $token = $request->cookie('token');
 
         if (!$token) {
-            return response()->json(['mensaje' => 'La respuesta llego al servidor'], 200);
             return response()->json(['error' => 'Token not provided'], 401);
         }
 
@@ -109,10 +118,37 @@ class AuthController extends Controller
                 // Retorna una respuesta exitosa y elimina la cookie
                 // TODO: revisar si es necesario el withoutCookie
 
-                return response()->json(['message' => 'Successfully logged out'], 200)->cookie('token', '', -1);
+                return response()->json(['message' => 'Successfully logged out'], 200)->cookie(
+                    'token',
+                    '', // Valor vacío
+                    -1, // Tiempo negativo para expirar inmediatamente
+                    '/',
+                    null,
+                    true,
+                    true,
+                    false,
+                    'Strict'
+                );
             } catch (JWTException $e) {
                 return response()->json(['error' => 'Could not invalidate token', 'exception' => $e->getMessage()], 500);
             }
+        }
+    }
+
+    // Verificar si el token es valido
+    public function isValidToken(Request $request)
+    {
+        $token = $request->cookie('token');
+
+        if (!$token) {
+            return response()->json(['error' => 'Token not provided'], 401);
+        }
+
+        try {
+            JWTAuth::setToken($token)->checkOrFail();
+            return response()->json(['valid' => true], 200);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Invalid token', 'exception' => $e->getMessage()], 401);
         }
     }
 }

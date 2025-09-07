@@ -28,8 +28,10 @@ class Auth
                 }
             }
         } catch (\Throwable $th) {
-            //throw $th;
-            return response()->json(['error' => 'Unauthorized', 'message' => $th->getMessage()], 401);
+            // Si el token es inválido, retornamos error y borramos la cookie
+            return response()->json(['error' => 'Unauthorized', 'message' => $th->getMessage()], 401)
+                ->cookie('token', '', -1); // Cookie vacía con tiempo de expiración en el pasado
+            return $next($request);
         }
 
         // Si no hay token, retornamos respuesta de no autorizado
