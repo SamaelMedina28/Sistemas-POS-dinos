@@ -16,21 +16,8 @@ return new class extends Migration
             $table->enum('type', ['x', 'z'])->default('x');
             $table->date('date');
             $table->time('time');
+            $table->integer('product_count')->nullable()->default(0);
             $table->foreignId('lot_id')->constrained()->cascadeOnDelete();
-            /* 
-            
-            // Los valores que el usurio nos manda
-            $table->float('cash', 10, 2)->nullable()->default(0.0);
-            $table->float('card', 10, 2)->nullable()->default(0.0);
-            // Los valores que sumamos apartir de las ventas del lote
-            $table->float('cash_total', 10, 2)->nullable()->default(0.0);
-            $table->float('card_total', 10, 2)->nullable()->default(0.0);
-            $table->float('total', 10, 2)->nullable()->default(0.0);
-            // Las diferencias que se generan
-            $table->float('cash_difference', 10, 2)->nullable()->default(0.0);
-            $table->float('card_difference', 10, 2)->nullable()->default(0.0);
-            $table->float('total_difference', 10, 2)->nullable()->default(0.0);
-             */
             $table->timestamps();
         });
     }
