@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('lots', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('image_path')->nullable();
-            $table->foreignId('type_id')->constrained()->onDelete('cascade');
+            $table->date('date');
+            $table->time('start_time');
+            $table->time('end_time')->nullable();
+            $table->integer('product_count')->nullable()->default(0);
+            $table->float('total_amount', 10, 2)->nullable()->default(0.0);
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('lots');
     }
 };
