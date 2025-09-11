@@ -15,18 +15,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/prueba', function() {
-    // Product::find(5)->delete();
-    // $products = Product::all();
-    // $products = Product::withTrashed()->get();
-    $ventas = Lot::find(1)->with(['sales.products', 'sales.payment'])->get();
-    return response()->json([
-        'ventas' => $ventas,
-    ]);
-});
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/user', [AuthController::class, 'getUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/validate', [AuthController::class, 'isValidToken']);
+    Route::middleware('admin')->group(function () {
+        Route::get('/prueba', function() {
+            return response()->json([
+                'message' => 'Admin'
+            ]);
+        });
+    });
 });
