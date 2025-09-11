@@ -47,7 +47,6 @@ class UserController extends Controller
     }
 
     // Actualizar un usuario
-    // TODO: Proteger que un usuario admin no pueda bajar de rango a otro admin
     public function update(Request $request, User $user)
     {
         if ($user->id == JWTAuth::user()->id) {
@@ -63,7 +62,7 @@ class UserController extends Controller
         }
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'required|string|min:8',
             'role' => 'required|string|in:admin,sales',
         ]);
