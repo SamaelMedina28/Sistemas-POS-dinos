@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cut extends Model
 {
+    protected $fillable = [
+        'type',
+        'date',
+        'time',
+        'product_count',
+        'total_amount',
+        'lot_id',
+    ];
     // relacion con lote
     public function lot()
     {
