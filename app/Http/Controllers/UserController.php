@@ -55,6 +55,12 @@ class UserController extends Controller
                 'error' => 'You cannot update yourself'
             ], 403);
         }
+        // Verificar si el usuario es un admin y el usuario autenticado no es el root
+        if($user->role == 'admin' && JWTAuth::user()->role != 'root') {
+            return response()->json([
+                'error' => 'Only the root user can update an admin'
+            ], 403);
+        }
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -66,12 +72,6 @@ class UserController extends Controller
             return response()->json([
                 'errors' => $validator->errors()
             ], 422);
-        }
-        // Verificar que el usuario no sea un admin (solo el root puede actualizar a un admin)
-        if($user->role == 'admin' && JWTAuth::user()->role != 'root') {
-            return response()->json([
-                'error' => 'Only the root user can update an admin'
-            ], 403);
         }
 
         $user->update([
