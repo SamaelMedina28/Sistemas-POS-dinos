@@ -13,8 +13,15 @@ class Lot extends Model
         'product_count',
         'total_amount',
     ];
+    // Relacion con los cortes
     public function cuts()
     {
         return $this->hasMany(Cut::class);
+    }
+
+    // Relacion con las ventas
+    public function sales()
+    {
+        return $this->hasMany(Sale::class);
     }
 }

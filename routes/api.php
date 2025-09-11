@@ -40,6 +40,8 @@ Route::get('/prueba', function() {
     // return response()->json([
     //     'cut' => $cut,
     //     ]);
+    $cuts = Cut::with('cutDetails')->get();
+    return response()->json($cuts);
 });
 
 Route::middleware('auth')->group(function () {
