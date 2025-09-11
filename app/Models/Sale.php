@@ -13,7 +13,6 @@ class Sale extends Model
     protected $fillable = [
         'date',
         'time',
-        'product_count',
         'lot_id',
     ];
 
@@ -27,5 +26,11 @@ class Sale extends Model
     public function payment()
     {
         return $this->hasOne(Payment::class);
+    }
+
+    // relacion muchos a muchos con products
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'sale_details', 'sale_id', 'product_id')->withPivot('original_price', 'original_name', 'original_minutes');
     }
 }
