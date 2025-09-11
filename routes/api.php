@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,5 +19,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/validate', [AuthController::class, 'isValidToken']);
     Route::prefix('admin')->middleware('admin')->group(function () {
         Route::apiResource('user', UserController::class);
+        Route::apiResource('type', TypeController::class);
     });
 });
