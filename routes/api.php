@@ -21,6 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->middleware('admin')->group(function () {
         Route::apiResource('user', UserController::class);
         Route::apiResource('type', TypeController::class);
-        Route::apiResource('product', ProductController::class);
+        Route::apiResource('product', ProductController::class)->except(['update']);
+        Route::post('/product/{product}', [ProductController::class, 'update'])->name('product.update');
     });
 });
