@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
 {
@@ -45,49 +46,52 @@ class SaleController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-        // ? Traemos los productos
-        $products = Product::whereIn('id', $request->products)->get();
-        // ? Calculamos el total
-        $total = $products->sum('type.price');
-        // ? Validamos que el pago sea suficiente
-        if ($request->card + $request->cash < $total) {
-            return response()->json([
-                'error' => 'El pago no es suficiente',
+
+        return DB::transaction(function () use ($request) {
+            // ? Traemos los productos
+            $products = Product::whereIn('id', $request->products)->get();
+            // ? Calculamos el total
+            $total = $products->sum('type.price');
+            // ? Validamos que el pago sea suficiente
+            if ($request->card + $request->cash < $total) {
+                return response()->json([
+                    'error' => 'El pago no es suficiente',
+                    'method' => $request->method,
+                    'cash' => $request->cash,
+                    'card' => $request->card,
+                    'total_send' => $request->card + $request->cash,
+                    'total_to_pay' => $total,
+                    'difference' => $request->card + $request->cash - $total,
+                ], 422);
+            }
+            // ? Checamos si existe algun lote
+            $lot = $this->createLot();
+            // ? Creamos la venta y la asociamos al lote
+            $sale = Sale::create([
+                'date' => now(),
+                'time' => now(),
+                'lot_id' => $lot->id,
+            ]);
+            // ? Asociamos los productos a la venta
+            $this->associateProducts($sale, $products);
+            // ? Creamos la informacion del pago
+            $sale->payment()->create([
                 'method' => $request->method,
-                'cash' => $request->cash,
-                'card' => $request->card,
-                'total_send' => $request->card + $request->cash,
-                'total_to_pay' => $total,
-                'difference' => $request->card + $request->cash - $total,
-            ], 422);
-        }
-        // ? Checamos si existe algun lote
-        $lot = $this->createLot();
-        // ? Creamos la venta y la asociamos al lote
-        $sale = Sale::create([
-            'date' => now(),
-            'time' => now(),
-            'lot_id' => $lot->id,
-        ]);
-        // ? Asociamos los productos a la venta
-        $this->associateProducts($sale, $products);
-        // ? Creamos la informacion del pago
-        $sale->payment()->create([
-            'method' => $request->method,
-            'cash' => ($total - $request->card),
-            'card' => $request->card ?? 0,
-            'change' => $request->cash - ($total - $request->card),
-            'total' => $total,
-        ]);
-        // ? Actualizamos el lote con la cantidad de productos y el total
-        $lot->update([
-            'product_count' => $lot->product_count + count($request->products),
-            'total_amount' => $lot->total_amount + $products->sum('type.price'),
-        ]);
-        // ? Devolvemos la venta con los productos y el cambio para el cliente
-        return response()->json([
-            'sale' => $sale->load('products', 'payment'),
-        ]);
+                'cash' => ($total - $request->card),
+                'card' => $request->card ?? 0,
+                'change' => $request->cash - ($total - $request->card),
+                'total' => $total,
+            ]);
+            // ? Actualizamos el lote con la cantidad de productos y el total
+            $lot->update([
+                'product_count' => $lot->product_count + count($request->products),
+                'total_amount' => $lot->total_amount + $products->sum('type.price'),
+            ]);
+            // ? Devolvemos la venta con los productos y el cambio para el cliente
+            return response()->json([
+                'sale' => $sale->load('products', 'payment'),
+            ]);
+        });
     }
 
     /**
