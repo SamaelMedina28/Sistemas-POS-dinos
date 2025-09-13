@@ -97,8 +97,9 @@ class SaleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Sale $sale)
+    public function show($id)
     {
+        $sale = Sale::find($id);
         if (!$sale) {
             return response()->json([
                 'error' => 'This sale does not exist'
