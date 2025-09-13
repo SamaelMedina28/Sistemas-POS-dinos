@@ -58,7 +58,7 @@ class ProductController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            !is_string($request->image_path) ?? 'image_path' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image_path' => $request->hasFile('image_path') ? 'image|mimes:jpeg,png,jpg,gif,svg|max:2048' : '',
             'type_id' => 'required|exists:types,id',
         ]);
         if ($validator->fails()) {
