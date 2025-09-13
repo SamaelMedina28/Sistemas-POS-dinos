@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 /* Route::get('/user', function (Request $request) {
@@ -20,5 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->middleware('admin')->group(function () {
         Route::apiResource('user', UserController::class);
         Route::apiResource('type', TypeController::class);
+        Route::apiResource('product', ProductController::class)->except(['update']);
+        Route::post('/product/{product}', [ProductController::class, 'update'])->name('product.update');
     });
 });
