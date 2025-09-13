@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SaleRequest;
 use App\Models\Lot;
 use App\Models\Product;
 use App\Models\Sale;
@@ -26,11 +27,13 @@ class SaleController extends Controller
     }
     /**
      * Store a newly created resource in storage.
+     * 
+     * @param  \App\Http\Requests  $request
      */
-    public function store(Request $request)
+    public function store(SaleRequest $request)
     {
         // ? Validaciones
-        $validator = Validator::make($request->all(), [
+        /* $validator = Validator::make($request->all(), [
             'products' => 'required|array',
             'products.*' => 'required|exists:products,id',
             'method' => 'required|in:cash,card,mix',
@@ -50,7 +53,7 @@ class SaleController extends Controller
             return response()->json([
                 'errors' => $validator->errors()
             ], 422);
-        }
+        } */
 
         return DB::transaction(function () use ($request) {
             // ? Traemos los productos
