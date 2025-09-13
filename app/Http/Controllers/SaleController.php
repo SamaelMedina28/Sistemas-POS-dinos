@@ -90,6 +90,11 @@ class SaleController extends Controller
      */
     public function show(Sale $sale)
     {
+        if (!$sale) {
+            return response()->json([
+                'error' => 'This sale does not exist'
+            ], 404);
+        }
         $sale->load('payment', 'products.type');
         return response()->json([
             'sale' => $sale
