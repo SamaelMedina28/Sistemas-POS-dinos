@@ -8,9 +8,14 @@ use App\Models\Sale;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\SaleService;
+use PhpParser\Node\Stmt\TryCatch;
 
 class SaleController extends Controller
 {
+    public function __construct(private SaleService $saleService)
+    {
+    }
 
     // Este metodo sera casi de prueba ya que nunca se deberia requerir el recuperar TODAS las ventas
     public function index()
@@ -51,42 +56,32 @@ class SaleController extends Controller
             // ? Traemos los productos
             $products = Product::whereIn('id', $request->products)->get();
             // ? Calculamos el total
-            $total = $products->sum('type.price');
+            $total = $this->saleService->calculateTotal($products);
             // ? Validamos que el pago sea suficiente
-            if ($request->card + $request->cash < $total) {
+            try {
+                $this->saleService->validatePayment($request, $total);
+            } catch (\Exception $e) {
                 return response()->json([
-                    'error' => 'El pago no es suficiente',
-                    'method' => $request->method,
-                    'cash' => $request->cash,
-                    'card' => $request->card,
-                    'total_send' => $request->card + $request->cash,
+                    'error'        => $e->getMessage(),
                     'total_to_pay' => $total,
-                    'difference' => $request->card + $request->cash - $total,
+                    'total_send'   => ($request->cash ?? 0) + ($request->card ?? 0),
+                    'difference'   => ($request->cash ?? 0) + ($request->card ?? 0) - $total,
+                    'cash'         => $request->cash ?? 0,
+                    'card'         => $request->card ?? 0,
+                    'method'       => $request->method,
                 ], 422);
             }
             // ? Checamos si existe algun lote
-            $lot = $this->createLot();
+            $lot = $this->saleService->createLot();
             // ? Creamos la venta y la asociamos al lote
-            $sale = Sale::create([
-                'date' => now(),
-                'time' => now(),
-                'lot_id' => $lot->id,
-            ]);
+            $sale = $this->saleService->createSale($lot);
             // ? Asociamos los productos a la venta
-            $this->associateProducts($sale, $products);
+            $this->saleService->associateProducts($sale, $products);
             // ? Creamos la informacion del pago
-            $sale->payment()->create([
-                'method' => $request->method,
-                'cash' => ($total - $request->card),
-                'card' => $request->card ?? 0,
-                'change' => $request->cash - ($total - $request->card),
-                'total' => $total,
-            ]);
+            $sale->payment()->create($this->saleService->preparePaymentData($request, $total));
             // ? Actualizamos el lote con la cantidad de productos y el total
-            $lot->update([
-                'product_count' => $lot->product_count + count($request->products),
-                'total_amount' => $lot->total_amount + $products->sum('type.price'),
-            ]);
+            $lot->increment('product_count', count($products));
+            $lot->increment('total_amount', $total);
             // ? Devolvemos la venta con los productos y el cambio para el cliente
             return response()->json([
                 'sale' => $sale->load('products', 'payment'),
@@ -109,31 +104,5 @@ class SaleController extends Controller
         return response()->json([
             'sale' => $sale
         ]);
-    }
-    private function associateProducts(Sale $sale, $products)
-    {
-        foreach ($products as $product) {
-            $sale->products()->attach($product->id, [
-                'original_name' => $product->name,
-                'original_price' => $product->type->price,
-                'original_minutes' => $product->type->minutes,
-            ]);
-        }
-    }
-
-    private function createLot()
-    {
-        $lot = Lot::latest()->first();
-        if (!$lot) {
-            // ? Si no existe ningun lote creamos uno
-            $lot = Lot::create([
-                'date' => now(),
-                'start_time' => now(),
-                'end_time' => null,
-                'product_count' => 0,
-                'total_amount' => 0.0,
-            ]);
-        }
-        return $lot;
     }
 }
