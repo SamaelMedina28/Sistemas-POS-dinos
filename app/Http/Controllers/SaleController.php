@@ -23,6 +23,20 @@ class SaleController extends Controller
      */
     public function store(Request $request)
     {
+        $products = Product::whereIn('id', $request->products)->get();
+        $total = $products->sum('type.price');
+        if ($request->card + $request->cash < $total) {
+            return response()->json([
+                'error' => 'El pago no es suficiente',
+                'method' => $request->method,
+                'cash' => $request->cash,
+                'card' => $request->card,
+                'total_send' => $request->card + $request->cash,
+                'total_to_pay' => $total,
+                'difference' => $request->card + $request->cash - $total,
+            ], 422);
+        }
+
         $validator = Validator::make($request->all(), [
             'products' => 'required|array',
             'products.*' => 'required|exists:products,id',
@@ -69,19 +83,20 @@ class SaleController extends Controller
                 'original_price' => $product->type->price,
                 'original_minutes' => $product->type->minutes,
             ]);
-            $lot->update([
-                'product_count' => $lot->product_count + 1,
-                'total_amount' => $lot->total_amount + $product->type->price,
-            ]);
-        }
+        }        
+        $lot->update([
+            'product_count' => $lot->product_count + count($request->products),
+            'total_amount' => $lot->total_amount + $products->sum('type.price'),
+        ]);
         $sale->payment()->create([
             'method' => $request->method,
             'cash' => $request->cash ?? 0,
             'card' => $request->card ?? 0,
-            'total' => $request->cash + $request->card,
+            'total' => $total,
         ]);
         return response()->json([
-            'sale' => $sale->load('payment', 'products'),
+            'change' => $request->cash + $request->card - $total,
+            'sale' => $sale->load('products'),
         ]);
     }
 
