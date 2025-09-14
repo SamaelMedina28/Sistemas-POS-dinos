@@ -39,9 +39,13 @@ class CutController extends Controller
                 'message' => $validator->errors()->first(),
             ], 422);
         }
-        $lot = null;
-        if ($request->type == 'x') {
-            $lot = Lot::latest()->first();
+        $lot = Lot::latest()->first();
+        if($request->type == 'z'){
+            // Cerramos el lote anterior
+            $lot->update([
+                'end_time' => now(),
+            ]);
+            // Creamos el corte con el lote anterior
             $cut = Cut::create([
                 'type' => $request->type,
                 'date' => now(),
@@ -49,19 +53,8 @@ class CutController extends Controller
                 'product_count' => $lot->product_count,
                 'lot_id' => $lot->id,
             ]);
-        }else if ($request->type == 'z') {
-            $latest_lot = Lot::latest()->first();
-            $latest_lot->update([
-                'end_time' => now(),
-            ]);
-            $cut = Cut::create([
-                'type' => $request->type,
-                'date' => now(),
-                'time' => now(),
-                'product_count' => $latest_lot->product_count,
-                'lot_id' => $latest_lot->id,
-            ]);
-            $lot = Lot::create([
+            // Creamos el nuevo lote
+            Lot::create([
                 'date' => now(),
                 'start_time' => now(),
                 'product_count' => 0,
@@ -69,7 +62,15 @@ class CutController extends Controller
                 'card' => 0,
                 'total_amount' => 0,
             ]);
-            
+        }else{
+            // Creamos el corte con el lote anterior
+            $cut = Cut::create([
+                'type' => $request->type,
+                'date' => now(),
+                'time' => now(),
+                'product_count' => $lot->product_count,
+                'lot_id' => $lot->id,
+            ]);
         }
         $cut->cutDetails()->create([
             'cash' => $request->cash,
