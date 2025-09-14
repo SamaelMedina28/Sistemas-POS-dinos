@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CutController;
+use App\Http\Controllers\LotController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
@@ -21,5 +22,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/product/{product}', [ProductController::class, 'update'])->name('product.update');
         Route::apiResource('sale', SaleController::class)->except(['destroy', 'update']);
         Route::apiResource('cut', CutController::class)->except(['destroy', 'update']);
+        Route::get('/lot', [LotController::class, 'index'])->name('lot.index');
     });
 });
