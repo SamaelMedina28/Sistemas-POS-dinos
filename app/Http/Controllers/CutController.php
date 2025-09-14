@@ -93,6 +93,8 @@ class CutController extends Controller
      */
     public function show(Cut $cut)
     {
-        //
+        return response()->json([
+            'cut' => $cut->load('cutDetails'),
+        ], 200);
     }
 }
