@@ -14,7 +14,7 @@ class CutController extends Controller
      */
     public function index()
     {
-        return Cut::orderByDesc('id')->get();
+        return Cut::with('cutDetails')->get();
     }
 
     /**
@@ -41,7 +41,6 @@ class CutController extends Controller
         }
 
         $lot = Lot::latest()->first();
-        return $lot;
 
         if ($request->type == 'x') {
             $cut = Cut::create([
@@ -54,10 +53,18 @@ class CutController extends Controller
             $cut->cutDetails()->create([
                 'cash' => $request->cash,
                 'card' => $request->card,
-
+                'cash_total' => $lot->cash,
+                'card_total' => $lot->card,
+                'total' => $lot->cash + $lot->card,
+                'cash_difference' => $request->cash - $lot->cash,
+                'card_difference' => $request->card - $lot->card,
+                'total_difference' => ($request->cash + $request->card) - ($lot->cash + $lot->card),
             ]);
+
         }
-        
+        return response()->json([
+            'cut' => $cut->load('cutDetails'),
+        ], 201);
     }
 
     /**
