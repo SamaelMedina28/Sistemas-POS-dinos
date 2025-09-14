@@ -24,11 +24,14 @@ class SaleService
 
   public function preparePaymentData($request, $total)
   {
+    $cash = max(0, $total - ($request->card ?? 0));
+    $card = $request->card ?? 0;
+    $change = ($request->cash ?? 0) - ($total - ($request->card ?? 0));
     return [
       'method' => $request->method,
-      'cash'   => max(0, $total - ($request->card ?? 0)),
-      'card'   => $request->card ?? 0,
-      'change' => ($request->cash ?? 0) - ($total - ($request->card ?? 0)),
+      'cash'   => $cash,
+      'card'   => $card,
+      'change' => $change,
       'total'  => $total,
     ];
   }
