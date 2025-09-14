@@ -22,6 +22,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/product/{product}', [ProductController::class, 'update'])->name('product.update');
         Route::apiResource('sale', SaleController::class)->except(['destroy', 'update']);
         Route::apiResource('cut', CutController::class)->except(['destroy', 'update']);
-        Route::get('/lot', [LotController::class, 'index'])->name('lot.index');
+        Route::apiResource('lot', LotController::class)->except(['store', 'update', 'destroy']);
     });
 });
