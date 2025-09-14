@@ -12,15 +12,7 @@ class CutController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return Cut::orderByDesc('id')->get();
     }
 
     /**
@@ -35,30 +27,6 @@ class CutController extends Controller
      * Display the specified resource.
      */
     public function show(Cut $cut)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Cut $cut)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Cut $cut)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Cut $cut)
     {
         //
     }
