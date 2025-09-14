@@ -39,10 +39,9 @@ class CutController extends Controller
                 'message' => $validator->errors()->first(),
             ], 422);
         }
-
-        $lot = Lot::latest()->first();
-
+        $lot = null;
         if ($request->type == 'x') {
+            $lot = Lot::latest()->first();
             $cut = Cut::create([
                 'type' => $request->type,
                 'date' => now(),
@@ -50,18 +49,39 @@ class CutController extends Controller
                 'product_count' => $lot->product_count,
                 'lot_id' => $lot->id,
             ]);
-            $cut->cutDetails()->create([
-                'cash' => $request->cash,
-                'card' => $request->card,
-                'cash_total' => $lot->cash,
-                'card_total' => $lot->card,
-                'total' => $lot->cash + $lot->card,
-                'cash_difference' => $request->cash - $lot->cash,
-                'card_difference' => $request->card - $lot->card,
-                'total_difference' => ($request->cash + $request->card) - ($lot->cash + $lot->card),
+        }else if ($request->type == 'z') {
+            $latest_lot = Lot::latest()->first();
+            $latest_lot->update([
+                'end_time' => now(),
             ]);
-
+            $cut = Cut::create([
+                'type' => $request->type,
+                'date' => now(),
+                'time' => now(),
+                'product_count' => $latest_lot->product_count,
+                'lot_id' => $latest_lot->id,
+            ]);
+            $lot = Lot::create([
+                'date' => now(),
+                'start_time' => now(),
+                'product_count' => 0,
+                'cash' => 0,
+                'card' => 0,
+                'total_amount' => 0,
+            ]);
+            
         }
+        $cut->cutDetails()->create([
+            'cash' => $request->cash,
+            'card' => $request->card,
+            'cash_total' => $lot->cash,
+            'card_total' => $lot->card,
+            'total' => $lot->cash + $lot->card,
+            'cash_difference' => $request->cash - $lot->cash,
+            'card_difference' => $request->card - $lot->card,
+            'total_difference' => ($request->cash + $request->card) - ($lot->cash + $lot->card),
+        ]);
+
         return response()->json([
             'cut' => $cut->load('cutDetails'),
         ], 201);
