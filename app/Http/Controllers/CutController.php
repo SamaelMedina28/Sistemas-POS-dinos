@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cut;
+use App\Models\Lot;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CutController extends Controller
 {
@@ -12,15 +14,7 @@ class CutController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return Cut::with('cutDetails')->get();
     }
 
     /**
@@ -28,7 +22,70 @@ class CutController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'type' => 'required|in:x,z',
+            'cash' => 'required',
+            'card' => 'required',
+        ], [
+            'type.required' => 'El tipo es requerido',
+            'type.in' => 'El tipo debe ser x o z',
+            'cash.required' => 'El efectivo es requerido',
+            'card.required' => 'La tarjeta es requerida',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first(),
+            ], 422);
+        }
+        $lot = Lot::latest()->first();
+        if($request->type == 'z'){
+            // Cerramos el lote anterior
+            $lot->update([
+                'end_time' => now(),
+            ]);
+            // Creamos el corte con el lote anterior
+            $cut = Cut::create([
+                'type' => $request->type,
+                'date' => now(),
+                'time' => now(),
+                'product_count' => $lot->product_count,
+                'lot_id' => $lot->id,
+            ]);
+            // Creamos el nuevo lote
+            Lot::create([
+                'date' => now(),
+                'start_time' => now(),
+                'product_count' => 0,
+                'cash' => 0,
+                'card' => 0,
+                'total_amount' => 0,
+            ]);
+        }else{
+            // Creamos el corte con el lote anterior
+            $cut = Cut::create([
+                'type' => $request->type,
+                'date' => now(),
+                'time' => now(),
+                'product_count' => $lot->product_count,
+                'lot_id' => $lot->id,
+            ]);
+        }
+        $cut->cutDetails()->create([
+            'cash' => $request->cash,
+            'card' => $request->card,
+            'cash_total' => $lot->cash,
+            'card_total' => $lot->card,
+            'total' => $lot->cash + $lot->card,
+            'cash_difference' => $request->cash - $lot->cash,
+            'card_difference' => $request->card - $lot->card,
+            'total_difference' => ($request->cash + $request->card) - ($lot->cash + $lot->card),
+        ]);
+
+        return response()->json([
+            'cut' => $cut->load('cutDetails'),
+        ], 201);
     }
 
     /**
@@ -36,30 +93,8 @@ class CutController extends Controller
      */
     public function show(Cut $cut)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Cut $cut)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Cut $cut)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Cut $cut)
-    {
-        //
+        return response()->json([
+            'cut' => $cut->load('cutDetails'),
+        ], 200);
     }
 }

@@ -29,8 +29,8 @@ class SaleController extends Controller
     public function store(SaleRequest $request)
     {
         return DB::transaction(function () use ($request) {
-            $products = Product::whereIn('id', $request->products)->get();// ? Traemos los productos
-            $total = $this->saleService->calculateTotal($products);// ? Calculamos el total
+            $products = Product::whereIn('id', $request->products)->get();// ? Traemos los productos vendidos
+            $total = $this->saleService->calculateTotal($products);// ? Calculamos el total por los productos
             // ? Validamos que el pago sea suficiente
             try {
                 $this->saleService->validatePayment($request, $total);
@@ -49,6 +49,8 @@ class SaleController extends Controller
             // Actualizamos el lote con la cantidad de productos y el total
             $lot->increment('product_count', count($products)); 
             $lot->increment('total_amount', $total); 
+            $lot->increment('cash', $sale->payment->cash);
+            $lot->increment('card', $sale->payment->card);
 
             return response()->json([
                 'sale' => $sale->load('products', 'payment'),
