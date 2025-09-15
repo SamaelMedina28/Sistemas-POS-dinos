@@ -15,6 +15,10 @@ class Sale extends Model
         'time',
         'lot_id',
     ];
+    protected $casts = [
+        'date' => 'datetime',
+        'time' => 'datetime',
+    ];
 
     // relacion con lote
     public function lot()

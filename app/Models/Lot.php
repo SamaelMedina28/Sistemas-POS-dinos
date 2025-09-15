@@ -13,6 +13,11 @@ class Lot extends Model
         'product_count',
         'total_amount',
     ];
+    protected $casts = [
+        'date' => 'datetime',
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+    ];
     // Relacion con los cortes
     public function cuts()
     {

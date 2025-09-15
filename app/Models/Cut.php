@@ -25,4 +25,9 @@ class Cut extends Model
     {
         return $this->hasOne(CutDetail::class);
     }
+
+    protected $casts = [
+        'date' => 'datetime',
+        'time' => 'datetime',
+    ];
 }
