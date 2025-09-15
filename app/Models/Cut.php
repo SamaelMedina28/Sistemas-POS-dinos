@@ -20,9 +20,9 @@ class Cut extends Model
         return $this->belongsTo(Lot::class);
     }
 
-    // relacion con cut details
-    public function cutDetails()
+    // relacion con cut detail
+    public function cutDetail()
     {
-        return $this->hasMany(CutDetail::class);
+        return $this->hasOne(CutDetail::class);
     }
 }

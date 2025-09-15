@@ -10,6 +10,7 @@ class Payment extends Model
         'method',
         'cash',
         'card',
+        'change',
         'total',
         'sale_id',
     ];
