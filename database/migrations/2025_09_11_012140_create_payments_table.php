@@ -16,6 +16,7 @@ return new class extends Migration
             $table->enum('method', ['cash', 'card', 'mix']);
             $table->decimal('cash', 10, 2)->nullable();
             $table->decimal('card', 10, 2)->nullable();
+            $table->decimal('change', 10, 2)->nullable();
             $table->decimal('total', 10, 2);
             $table->foreignId('sale_id')->constrained()->cascadeOnDelete();
             $table->timestamps();

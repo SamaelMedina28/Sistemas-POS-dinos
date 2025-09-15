@@ -17,6 +17,8 @@ return new class extends Migration
             $table->time('start_time');
             $table->time('end_time')->nullable();
             $table->integer('product_count')->nullable()->default(0);
+            $table->float('cash', 10, 2)->nullable()->default(0.0);
+            $table->float('card', 10, 2)->nullable()->default(0.0);
             $table->float('total_amount', 10, 2)->nullable()->default(0.0);
             $table->timestamps();
         });
