@@ -14,7 +14,7 @@ class CutController extends Controller
      */
     public function index()
     {
-        return Cut::with('cutDetails')->get();
+        return Cut::with('cutDetail')->get();
     }
 
     /**
@@ -84,7 +84,7 @@ class CutController extends Controller
         ]);
 
         return response()->json([
-            'cut' => $cut->load('cutDetails'),
+            'cut' => $cut->load('cutDetail'),
         ], 201);
     }
 
@@ -94,7 +94,7 @@ class CutController extends Controller
     public function show(Cut $cut)
     {
         return response()->json([
-            'cut' => $cut->load('cutDetails'),
+            'cut' => $cut->load('cutDetail'),
         ], 200);
     }
 }

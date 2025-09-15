@@ -17,7 +17,7 @@ class LotController extends Controller
             return $query->where('date', '>=', $request->start_date);
         })->when($request->end_date, function ($query) use ($request) {
             return $query->where('date', '<=', $request->end_date);
-        })->with('cuts.cutDetails')->get();
+        })->with('cuts.cutDetail')->get();
         // Traer todos los lotes
         return response()->json([
             'lots' => $lots
@@ -30,7 +30,7 @@ class LotController extends Controller
     public function show(Lot $lot)
     {
         return response()->json([
-            'lot' => $lot->load('cuts.cutDetails','sales.products','sales.payment')
+            'lot' => $lot->load('cuts.cutDetail','sales.products.type','sales.payment')
         ]);
     }
 
