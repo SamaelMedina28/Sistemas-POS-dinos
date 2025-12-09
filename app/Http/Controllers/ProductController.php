@@ -15,7 +15,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('type')->orderBy('id', 'desc')->get();
+        $status = request('status', 'active');
+        $products = Product::with('type')->orderBy('id', 'desc')->where('status', $status)->get();
         return response()->json($products);
     }
 

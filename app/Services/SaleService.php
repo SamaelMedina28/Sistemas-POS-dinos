@@ -70,6 +70,9 @@ class SaleService
   public function associateProducts(Sale $sale, $products)
   {
     foreach ($products as $product) {
+      $product->update([
+        'status' => 'inactive'
+      ]);
       $sale->products()->attach($product->id, [
         'original_name'    => $product->name,
         'original_price'   => $product->type->price,

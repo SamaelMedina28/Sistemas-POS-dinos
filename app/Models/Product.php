@@ -16,6 +16,7 @@ class Product extends Model
         'name',
         'image_path',
         'type_id',
+        'status',
     ];
 
     // Relacion uno a unos con types
