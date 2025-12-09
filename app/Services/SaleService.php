@@ -13,6 +13,7 @@ class SaleService
     return $products->sum('type.price');
   }
 
+  // ? Validamos que el pago sea mayor o igual al total
   public function validatePayment($request, $total)
   {
     $paid = ($request->cash ?? 0) + ($request->card ?? 0);
@@ -22,6 +23,7 @@ class SaleService
     return $paid;
   }
 
+  // ? Preparamos los datos del pago
   public function preparePaymentData($request, $total)
   {
     $cash = max(0, $total - ($request->card ?? 0));
@@ -36,6 +38,7 @@ class SaleService
     ];
   }
 
+  // ? Creamos un nuevo lote
   public function createLot(): Lot
   {
     $lot = Lot::latest()->first();
@@ -51,6 +54,7 @@ class SaleService
     return $lot;
   }
 
+  // ? Creamos una nueva venta
   public function createSale(Lot $lot): Sale
   {
     return Sale::create([
@@ -60,6 +64,7 @@ class SaleService
     ]);
   }
 
+  // ? Asociamos los productos a la venta
   public function associateProducts(Sale $sale, $products)
   {
     foreach ($products as $product) {

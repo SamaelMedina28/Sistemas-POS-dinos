@@ -28,6 +28,7 @@ class SaleController extends Controller
      */
     public function store(SaleRequest $request)
     {
+        // Transaccion para que si algo falla se deshaga todo
         return DB::transaction(function () use ($request) {
             $products = Product::whereIn('id', $request->products)->get();// ? Traemos los productos vendidos
             $total = $this->saleService->calculateTotal($products);// ? Calculamos el total por los productos
