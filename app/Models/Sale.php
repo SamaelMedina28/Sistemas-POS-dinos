@@ -13,6 +13,7 @@ class Sale extends Model
     protected $fillable = [
         'date',
         'time',
+        'customer',
         'lot_id',
     ];
     protected $casts = [

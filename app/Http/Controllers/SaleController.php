@@ -25,12 +25,18 @@ class SaleController extends Controller
      * Store a newly created resource in storage.
      * 
      * @param  \App\Http\Requests  $request
+     * {"products": [1,2,3,5],
+     * "method": "mix",
+     * "cash": 1000,
+     * "card":50
+     * "customer": "John Doe"
+     * }
      */
     public function store(SaleRequest $request)
     {
         // Transaccion para que si algo falla se deshaga todo
         return DB::transaction(function () use ($request) {
-            $products = Product::whereIn('id', $request->products)->get();// ? Traemos los productos vendidos
+            $products = Product::whereIn('id', $request->products)->get();// ? Traemos los productos con los id que nos mandaron
             $total = $this->saleService->calculateTotal($products);// ? Calculamos el total por los productos
             // ? Validamos que el pago sea suficiente
             try {
@@ -43,11 +49,15 @@ class SaleController extends Controller
                 ], 422);
             }
             
+            // ? Crea un nuevo lote o lo toma el ultimo disponible
             $lot = $this->saleService->createLot();
-            $sale = $this->saleService->createSale($lot); // ? Creamos la venta y la asociamos al lote
-            $this->saleService->associateProducts($sale, $products); // ? Asociamos los productos a la venta
-            $sale->payment()->create($this->saleService->preparePaymentData($request, $total)); // ? Creamos la informacion del pago
-            // Actualizamos el lote con la cantidad de productos y el total
+            // ? Creamos la venta y la asociamos al lot
+            $sale = $this->saleService->createSale($lot, $request->customer); 
+            // ? Asociamos los productos a la venta
+            $this->saleService->associateProducts($sale, $products); 
+            // ? Creamos la informacion del pago
+            $sale->payment()->create($this->saleService->preparePaymentData($request, $total)); 
+            // ? Actualizamos el lote con la cantidad de productos y el total
             $lot->increment('product_count', count($products)); 
             $lot->increment('total_amount', $total); 
             $lot->increment('cash', $sale->payment->cash);

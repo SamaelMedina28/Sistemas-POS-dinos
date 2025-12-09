@@ -26,6 +26,7 @@ class SaleService
   // ? Preparamos los datos del pago
   public function preparePaymentData($request, $total)
   {
+    // Si el pago es mixto usamos este algorimo para definir cuanto cambio devolveremos, tu confia bro
     $cash = max(0, $total - ($request->card ?? 0));
     $card = $request->card ?? 0;
     $change = ($request->cash ?? 0) - ($total - ($request->card ?? 0));
@@ -55,12 +56,13 @@ class SaleService
   }
 
   // ? Creamos una nueva venta
-  public function createSale(Lot $lot): Sale
+  public function createSale(Lot $lot, $customer): Sale
   {
     return Sale::create([
-      'date'   => now(),
-      'time'   => now(),
-      'lot_id' => $lot->id,
+      'customer' => $customer,
+      'date'     => now(),
+      'time'     => now(),
+      'lot_id'   => $lot->id,
     ]);
   }
 

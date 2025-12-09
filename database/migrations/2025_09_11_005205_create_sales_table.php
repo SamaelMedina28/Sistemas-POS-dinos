@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->date('date');
             $table->time('time');
+            $table->string('customer');
             $table->foreignId('lot_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });

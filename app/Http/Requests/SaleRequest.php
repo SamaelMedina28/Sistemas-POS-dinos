@@ -27,6 +27,7 @@ class SaleRequest extends FormRequest
             'method' => 'required|in:cash,card,mix',
             'cash' => 'required_if:method,cash|required_if:method,mix|numeric',
             'card' => 'required_if:method,card|required_if:method,mix|numeric',
+            'customer' => 'required|string',
         ];
     }
 
@@ -42,6 +43,8 @@ class SaleRequest extends FormRequest
             'cash.numeric' => 'El efectivo debe ser un numero',
             'card.required_if' => 'La tarjeta es requerida',
             'card.numeric' => 'La tarjeta debe ser un numero',
+            'customer.required' => 'El cliente es requerido',
+            'customer.string' => 'El cliente debe ser un string',
         ];
     }
 }
